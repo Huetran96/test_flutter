@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_ui/bloc/destination_bloc.dart';
+import 'package:mobile_ui/bloc/destination_state.dart';
+import 'package:mobile_ui/data/destination.dart';
 
 class HomePage extends StatelessWidget {
   HomePage({super.key});
-
-  final List<Map<String, dynamic>> destinations = [
-    {'name': 'Hoi An', 'image': 'assets/hoian.jpg', 'rating': 4.0},
-    {'name': 'Sai Gon', 'image': 'assets/sai_gon.jpg', 'rating': 4.5},
-    {'name': 'Da Nang', 'image': 'assets/da_nang.jpg', 'rating': 4.2},
-    {'name': 'Sapa', 'image': 'assets/sapa.jpg', 'rating': 4.7},
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -72,19 +69,37 @@ class HomePage extends StatelessWidget {
                   'Popular Destinations',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                Expanded(
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.8,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
-                    itemCount: destinations.length,
-                    itemBuilder: (context, index) {
-                      return destinationCard(destinations[index]);
-                    },
-                  ),
+                BlocBuilder<DestinationBloc, DestinationState>(
+                  builder: (context, state){
+                    if(state is DestinationLoading){
+                      return Container(
+                        child: CircularProgressIndicator()
+                      );
+                    }else if(state is DestinationLoaded) {
+                      return Expanded(
+                        child: GridView.builder(
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.8,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                          ),
+                          itemCount: state.destinations!.length,
+                          itemBuilder: (context, index) {
+                            return destinationCard(state.destinations![index]);
+                          },
+                        ),
+                      );
+                    }else if(state is DestinationFulure){
+                      return Container(
+                        child: Text(state.message!),
+                      );
+                    }
+                    return Container(
+                      child: Text('Empty.'),
+                    );
+                  },
+
                 ),
               ],
             ),
@@ -112,14 +127,14 @@ Widget categoryButton(IconData icon, String label, Color color) {
   );
 }
 
-Widget destinationCard(Map<String, dynamic> destination) {
+Widget destinationCard(Destination destination) {
   return Stack(
     children: [
       Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           image: DecorationImage(
-            image: AssetImage(destination['image']),
+            image: NetworkImage(destination.image!),
             fit: BoxFit.cover,
           ),
         ),
@@ -136,7 +151,7 @@ Widget destinationCard(Map<String, dynamic> destination) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              destination['name'],
+              destination.name!,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -147,7 +162,7 @@ Widget destinationCard(Map<String, dynamic> destination) {
               children: [
                 Icon(Icons.star, color: Colors.yellow, size: 16),
                 Text(
-                  destination['rating'].toString(),
+                  destination.rating!.toString(),
                   style: TextStyle(color: Colors.white, fontSize: 14),
                 ),
               ],

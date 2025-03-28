@@ -1,6 +1,5 @@
 package com.spring.backend.travel;
 
-import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
@@ -8,12 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
-@Table(name = "travel")
-public class Destination {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class DestinationCreate {
     private String name;
     private String image;
     private int rating;
